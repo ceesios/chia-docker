@@ -1,20 +1,29 @@
 cd /chia-blockchain
 
 . ./activate
-
 chia init
 
-if [[ ${keys} == "generate" ]]; then
-  echo "to use your own keys pass them as a text file -v /path/to/keyfile:/path/in/container and -e keys=\"/path/in/container\""
-  chia keys generate
+if [[ ${ca} == "new" ]]; then
+  echo "### to use your own ca pass the ca folder -v /path/to/ca:/path/in/container and -e ca=\"/path/in/container\""
 else
+  echo "### Starting chia init with own ca: ${ca}"
+  chia init -c ${ca}
+fi
+
+if [[ ${keys} == "generate" ]]; then
+  echo "### to use your own keys pass them as a text file -v /path/to/keyfile:/path/in/container and -e keys=\"/path/in/container\""
+  chia keys generate
+elif [[ ${keys} == "false" ]]; then
+  echo "### Not adding keys"
+else
+  echo "### Adding keys"
   chia keys add -f ${keys}
 fi
 
 for p in ${plots_dir//:/ }; do
     mkdir -p ${p}
     if [[ ! "$(ls -A $p)" ]]; then
-        echo "Plots directory '${p}' appears to be empty, try mounting a plot directory with the docker -v command"
+        echo "### Plots directory '${p}' appears to be empty, try mounting a plot directory with the docker -v command"
     fi
     chia plots add -d ${p}
 done
@@ -41,6 +50,14 @@ if [[ ${testnet} == "true" ]]; then
   else
     chia configure --set-fullnode-port ${var.full_node_port}
   fi
+fi
+
+if [[ ${chiadog} == "true" ]]; then
+  cd /chiadog
+  chia configure -log-level=INFO
+  sed -i 's/<pushover_api_token>/$chiadog_pushover_api_token/g' ./config.yaml
+  sed -i 's/<pushover_user_key>/$chiadog_pushover_user_key/g' ./config.yaml
+  ./start.sh
 fi
 
 while true; do sleep 30; done;

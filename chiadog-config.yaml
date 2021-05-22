@@ -1,0 +1,51 @@
+notification_title_prefix: 'Chia-farmer-docker'
+log_level: INFO
+chia_logs:
+  file_log_consumer:
+    enable: true
+    file_path: '~/.chia/mainnet/log/debug.log'
+keep_alive_monitor:
+  enable_remote_ping: false
+  ping_url: ''
+daily_stats:
+  enable: true
+  time_of_day: 21
+notifier:
+  pushover:
+    enable: true
+    daily_stats: true
+    wallet_events: true
+    credentials:
+      api_token: '<pushover_api_token>'
+      user_key: '<pushover_user_key>'
+  telegram:
+    enable: false
+    daily_stats: true
+    credentials:
+      bot_token: 'dummy_bot_token'
+      chat_id: 'dummy_chat_id'
+  smtp:
+    enable: false
+    daily_stats: true
+    credentials:
+      sender: 'chia@example.com'
+      sender_name: 'chiadog'
+      recipient: 'you@example.com'
+      username_smtp: 'username'
+      password_smtp: 'password'
+      host: 'smtp.example.com'
+      port: 587
+  script:
+    enable: false
+    daily_stats: true
+    script_path: 'tests/test_script.sh'
+  discord:
+    enable: false
+    daily_stats: true
+    credentials:
+      webhook_url: 'https://discord.com/api/webhooks/...'
+  slack:
+    enable: false
+    daily_stats: true
+    credentials:
+      webhook_url: 'https://hooks.slack.com/services/...'

@@ -15,7 +15,7 @@ ENV full_node_port="null"
 ENV branch="1.1.6"
 
 RUN DEBIAN_FRONTEND=noninteractive apt update \
-&& apt install -y ca-certificates openssl sudo python3.8-venv python3.8-distutils python3.8-dev git lsb-release
+&& apt install -y ca-certificates openssl sudo python3.8-venv python3.8-distutils python3.8-dev git lsb-release wget unzip
 
 RUN echo "cloning ${branch}"
 RUN git clone --branch ${branch} https://github.com/Chia-Network/chia-blockchain.git \
@@ -30,6 +30,7 @@ RUN git clone https://github.com/martomi/chiadog.git \
 && ./install.sh
 
 ADD ./chiadog-config.yaml chiadog/config.yaml
+ADD ./chia-dash-config.yaml /root/.config/chia-dashboard-satellite/config.yaml
 
 WORKDIR /chia-blockchain
 ADD ./entrypoint.sh entrypoint.sh

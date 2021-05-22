@@ -31,16 +31,20 @@ done
 sed -i 's/localhost/127.0.0.1/g' ~/.chia/mainnet/config/config.yaml
 
 if [[ ${farmer} == 'true' ]]; then
+  echo "### Starting farmer-only"
   chia start farmer-only
 elif [[ ${harvester} == 'true' ]]; then
   if [[ -z ${farmer_address} || -z ${farmer_port} ]]; then
     echo "A farmer peer address and port are required."
     exit
   else
+    echo "### configure farmer"
     chia configure --set-farmer-peer ${farmer_address}:${farmer_port}
-    chia start harvester
+    echo "### Starting harvester"
+    chia start harvester -r
   fi
 else
+  echo "### Starting farmer"
   chia start farmer
 fi
 
@@ -52,12 +56,21 @@ if [[ ${testnet} == "true" ]]; then
   fi
 fi
 
+if [[ ! -z ${chiadash_api_token} ]]; then
+  wget https://github.com/felixbrucker/chia-dashboard-satellite/releases/download/1.9.0/chia-dashboard-satellite-1.9.0-linux.zip
+  unzip chia-dashboard-satellite-1.9.0-linux.zip
+  sed -i "s/<chiadash_api_token>/${chiadash_api_token}/g" /root/.config/chia-dashboard-satellite/config.yaml
+  ./chia-dashboard-satellite-1.9.0/chia-dashboard-satellite &
+fi
+
 if [[ ${chiadog} == "true" ]]; then
   cd /chiadog
   chia configure -log-level=INFO
-  sed -i 's/<pushover_api_token>/$chiadog_pushover_api_token/g' ./config.yaml
-  sed -i 's/<pushover_user_key>/$chiadog_pushover_user_key/g' ./config.yaml
-  ./start.sh
+  sed -i "s/<pushover_api_token>/${chiadog_pushover_api_token}/g" ./config.yaml
+  sed -i "s/<pushover_user_key>/${chiadog_pushover_user_key}/g" ./config.yaml
+  . ./venv/bin/activate
+  nohup python3 -u main.py --config config.yaml > chiadog.log
 fi
+
 
 while true; do sleep 30; done;
